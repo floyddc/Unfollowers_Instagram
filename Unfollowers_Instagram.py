@@ -1,5 +1,6 @@
 import instaloader
 from tqdm import tqdm
+import getpass
 
 def get_followers(username, password):
     # Inizializza un'istanza di Instaloader
@@ -76,7 +77,7 @@ def get_non_reciprocal_followers(following, followers, output_file):
 
 if __name__ == "__main__":
     username = input("Insert your Instagram username: ")
-    password = input("Insert your Instagram password: ")
+    password = getpass.getpass("Insert your Instagram password: ")
 
     # Ottieni i follower
     followers = set(get_followers(username, password))
