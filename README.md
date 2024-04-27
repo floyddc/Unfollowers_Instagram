@@ -10,7 +10,6 @@ Python script to check who doesn't follow you back on Instagram.
 # How to install Python
 - Download it from https://www.python.org/downloads/
 - Run the setup and follow the instructions (make sure to tick "Add python.exe to PATH")
-- Done
 
 # SCRIPT USAGE
 - Download Unfollowers_Instagram.py and place it where you want
