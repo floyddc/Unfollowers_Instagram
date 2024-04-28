@@ -2,7 +2,7 @@ import instaloader
 from tqdm import tqdm
 import getpass
 
-def get_followers(username, password):
+def get_authenticated_instaloader(username, password):
     # Inizializza un'istanza di Instaloader
     loader = instaloader.Instaloader()
 
@@ -10,15 +10,24 @@ def get_followers(username, password):
         # Autenticazione
         loader.context.log("Login...")
         loader.context.login(username, password)
-        loader.context.log("Login done! Looking for your followers...")
+        loader.context.log("Login done!")
 
-        # Ottieni il profilo dell'utente fornito
-        profile = instaloader.Profile.from_username(loader.context, username)
+        # Memorizza il profilo dell'utente
+        loader_profile = instaloader.Profile.from_username(loader.context, username)
+        loader.profile = loader_profile
 
+        return loader
+
+    except instaloader.exceptions.BadCredentialsException:
+        print("Wrong credentials.")
+        return None
+
+def get_followers(loader):
+    try:
         # Ottieni la lista dei follower
         followers = []
-        with tqdm(desc="Download follower", unit="users", leave=False) as pbar:
-            for follower in profile.get_followers():
+        with tqdm(desc="Download followers", unit="users", leave=True, total=loader.profile.followers, dynamic_ncols=False) as pbar:
+            for follower in loader.profile.get_followers():
                 followers.append(follower.username)
                 pbar.update(1)
 
@@ -30,27 +39,13 @@ def get_followers(username, password):
     except instaloader.exceptions.QueryReturnedNotFoundException:
         print("Profile does not exist or it's private.")
         return []
-    except instaloader.exceptions.BadCredentialsException:
-        print("Wrong credentials.")
-        return []
 
-def get_following(username, password):
-    # Inizializza un'istanza di Instaloader
-    loader = instaloader.Instaloader()
-
+def get_following(loader):
     try:
-        # Autenticazione
-        loader.context.log("Login...")
-        loader.context.login(username, password)
-        loader.context.log("Login done! Looking for your following...")
-
-        # Ottieni il profilo dell'utente fornito
-        profile = instaloader.Profile.from_username(loader.context, username)
-
         # Ottieni la lista dei profili seguiti
         following = []
-        with tqdm(desc="Download following", unit="users", leave=False) as pbar:
-            for followee in profile.get_followees():
+        with tqdm(desc="Download following", unit="users", leave=True, total=loader.profile.followees, dynamic_ncols=False) as pbar:
+            for followee in loader.profile.get_followees():
                 following.append(followee.username)
                 pbar.update(1)
 
@@ -61,9 +56,6 @@ def get_following(username, password):
         return []
     except instaloader.exceptions.QueryReturnedNotFoundException:
         print("Profile does not exist or it's private.")
-        return []
-    except instaloader.exceptions.BadCredentialsException:
-        print("Wrong credentials.")
         return []
 
 def get_non_reciprocal_followers(following, followers, output_file):
@@ -79,33 +71,36 @@ if __name__ == "__main__":
     username = input("Insert your Instagram username: ")
     password = getpass.getpass("Insert your Instagram password: ")
 
-    # Ottieni i follower
-    followers = set(get_followers(username, password))
+    # Effettua il login una sola volta
+    loader = get_authenticated_instaloader(username, password)
+    if loader:
+        # Ottieni i follower
+        followers = set(get_followers(loader))
 
-    # Ottieni i profili seguiti
-    following = set(get_following(username, password))
+        # Ottieni i profili seguiti
+        following = set(get_following(loader))
 
-    # Nome dei file di output
-    followers_file = "followers.txt"
-    following_file = "following.txt"
-    output_file = "UNFOLLOWERS.txt"
+        # Nome dei file di output
+        followers_file = "followers.txt"
+        following_file = "following.txt"
+        output_file = "UNFOLLOWERS.txt"
 
-    # Salva i follower in un file di testo
-    with open(followers_file, 'w') as file:
-        with tqdm(desc="Saving followers", total=len(followers), unit="users", leave=False) as pbar:
-            for follower in sorted(followers):
-                file.write(follower + '\n')
-                pbar.update(1)
+        # Salva i follower in un file di testo
+        with open(followers_file, 'w') as file:
+            with tqdm(desc="Saving followers", unit="users", leave=True, total=len(followers), dynamic_ncols=False) as pbar:
+                for follower in sorted(followers):
+                    file.write(follower + '\n')
+                    pbar.update(1)
 
-    # Salva i profili seguiti in un file di testo
-    with open(following_file, 'w') as file:
-        with tqdm(desc="Saving following", total=len(following), unit="user", leave=False) as pbar:
-            for followee in sorted(following):
-                file.write(followee + '\n')
-                pbar.update(1)
+        # Salva i profili seguiti in un file di testo
+        with open(following_file, 'w') as file:
+            with tqdm(desc="Saving following", unit="user", leave=True, total=len(following), dynamic_ncols=False) as pbar:
+                for followee in sorted(following):
+                    file.write(followee + '\n')
+                    pbar.update(1)
 
-    # Trova e salva gli username non ricambiati
-    get_non_reciprocal_followers(following, followers, output_file)
+        # Trova e salva gli username non ricambiati
+        get_non_reciprocal_followers(following, followers, output_file)
 
-    print("Follower and following saved on ", followers_file, "and", following_file)
-    print("Accounts that don't follow you back saved on ", output_file)
+        print("Follower and following saved on ", followers_file, "and", following_file)
+        print("Accounts that don't follow you back saved on ", output_file)
