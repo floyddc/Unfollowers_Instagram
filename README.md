@@ -1,6 +1,6 @@
 # Unfollowers_Instagram
 Python script to check who doesn't follow you back on Instagram.
-![Screenshot](https://github.com/floyddc/Unfollowers_Instagram/assets/62873696/e4bdb2bf-8e15-4847-9674-8c7ce07326a2)
+
 
 # Requirements
 - Windows or Linux
