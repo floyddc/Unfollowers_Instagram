@@ -8,7 +8,7 @@ Python script to check who doesn't follow you back on Instagram.
 - Public Instagram account
 - 2-Factor Authentication disabled
 
-# How to install Python
+# How to install Python (usually on Linux it's pre-installed yet)
 - Download it from https://www.python.org/downloads/
 - Run the setup and follow the instructions (make sure to tick "Add python.exe to PATH")
 
