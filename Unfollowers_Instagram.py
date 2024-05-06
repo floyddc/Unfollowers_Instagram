@@ -1,6 +1,7 @@
 import instaloader
 from tqdm import tqdm
 import getpass
+import pyfiglet
 
 def get_authenticated_instaloader(username, password):
     # Inizializza un'istanza di Instaloader
@@ -68,6 +69,7 @@ def get_non_reciprocal_followers(following, followers, output_file):
             file.write(username + '\n')
 
 if __name__ == "__main__":
+    print(pyfiglet.figlet_format("Unfollowers Instagram"))
     username = input("Insert your Instagram username: ")
     password = getpass.getpass("Insert your Instagram password: ")
 
